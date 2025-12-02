@@ -1,4 +1,0 @@
-repository "計图大作业@tj_wallence666@cloud.cn"
-  path "/"
-    br "/main"
-    co "/main"
