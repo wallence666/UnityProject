@@ -5,7 +5,8 @@ public class SectionViewController : MonoBehaviour
     public Camera playerCamera;                   // FPS 摄像机
     public Camera topDownCamera;                  // 俯视摄像机（正交）
     public TemperatureLayerRenderer tempLayer;    // 你的温度层控制
-                                                  
+    public GameObject FunctionQuadCamera;        // 功能层摄像机（如果有）
+
     int mode = 0; // 0 = FPS, 1 = TopView, 2 = Temperature
 
     Vector3 fpsPos;
@@ -21,6 +22,7 @@ public class SectionViewController : MonoBehaviour
         playerCamera.enabled = true;
         topDownCamera.enabled = false;
         tempLayer.SetVisible(false);
+        FunctionQuadCamera.SetActive(false);
     }
 
     void Update()
@@ -45,7 +47,7 @@ public class SectionViewController : MonoBehaviour
             playerCamera.enabled = true;
             topDownCamera.enabled = false;
             tempLayer.SetVisible(false);
-
+            FunctionQuadCamera.SetActive(false);
             // 恢复相机位置（避免卡进模型）
             playerCamera.transform.localPosition = fpsPos;
             playerCamera.transform.localRotation = fpsRot;
@@ -58,6 +60,7 @@ public class SectionViewController : MonoBehaviour
             playerCamera.enabled = false;
             topDownCamera.enabled = true;
             tempLayer.SetVisible(false);
+            FunctionQuadCamera.SetActive(true);
         }
         else if (mode == 2)
         {
@@ -67,6 +70,7 @@ public class SectionViewController : MonoBehaviour
             playerCamera.enabled = false;
             topDownCamera.enabled = true;
             tempLayer.SetVisible(true);
+            FunctionQuadCamera.SetActive(false);
         }
     }
 }
