@@ -6,8 +6,11 @@ public class SectionViewController : MonoBehaviour
     public Camera topDownCamera;                  // 俯视摄像机（正交）
     public TemperatureLayerRenderer tempLayer;    // 你的温度层控制
     public GameObject FunctionQuadCamera;        // 功能层摄像机（如果有）
+    public GameObject heatmapQuad;
+    public ParticleSystem heatmapParticleSystem;
+    public ParticleSystemRenderer heatmapParticlerenderer;
 
-    int mode = 0; // 0 = FPS, 1 = TopView, 2 = Temperature
+    int mode = 0; // 0 = FPS, 1 = TopView, 2 = Temperature, 3 = Heatmap
 
     Vector3 fpsPos;
     Quaternion fpsRot;
@@ -23,6 +26,9 @@ public class SectionViewController : MonoBehaviour
         topDownCamera.enabled = false;
         tempLayer.SetVisible(false);
         FunctionQuadCamera.SetActive(false);
+        heatmapQuad.SetActive(false);
+        heatmapParticlerenderer = heatmapParticleSystem.GetComponent<ParticleSystemRenderer>();
+        heatmapParticlerenderer.enabled = false;
     }
 
     void Update()
@@ -35,7 +41,7 @@ public class SectionViewController : MonoBehaviour
 
     void SwitchMode()
     {
-        mode = (mode + 1) % 3;
+        mode = (mode + 1) % 4;
 
         Debug.Log("切换模式 = " + mode);
 
@@ -48,6 +54,8 @@ public class SectionViewController : MonoBehaviour
             topDownCamera.enabled = false;
             tempLayer.SetVisible(false);
             FunctionQuadCamera.SetActive(false);
+            heatmapQuad.SetActive(false);
+            heatmapParticlerenderer.enabled = false;
             // 恢复相机位置（避免卡进模型）
             playerCamera.transform.localPosition = fpsPos;
             playerCamera.transform.localRotation = fpsRot;
@@ -61,6 +69,8 @@ public class SectionViewController : MonoBehaviour
             topDownCamera.enabled = true;
             tempLayer.SetVisible(false);
             FunctionQuadCamera.SetActive(true);
+            heatmapQuad.SetActive(false);
+            heatmapParticlerenderer.enabled = false;
         }
         else if (mode == 2)
         {
@@ -71,6 +81,20 @@ public class SectionViewController : MonoBehaviour
             topDownCamera.enabled = true;
             tempLayer.SetVisible(true);
             FunctionQuadCamera.SetActive(false);
+            heatmapQuad.SetActive(false);
+            heatmapParticlerenderer.enabled = false;
+        }
+        else if (mode == 3)
+        {
+            // =====================
+            // 热力图可视化层（平面图）
+            // =====================
+            playerCamera.enabled = false;
+            topDownCamera.enabled = true;
+            tempLayer.SetVisible(false);
+            FunctionQuadCamera.SetActive(false);
+            heatmapQuad.SetActive(true);
+            heatmapParticlerenderer.enabled = true;
         }
     }
 }
