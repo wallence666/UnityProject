@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class MonitorScreen_Change : MonoBehaviour
 {
-    [Header("材质设置")]
-    [SerializeField] private Material[] screenMaterials;  // 三种屏幕材质
-    [SerializeField] private int currentMaterialIndex = 0;  // 当前材质索引
+    [Header("渲染设置")]
+    [SerializeField] private RenderTexture[] screenRenderTextures;  // 渲染纹理数组，数量不固定
+    [SerializeField] private int currentTextureIndex = 0;  // 当前渲染纹理索引
 
     [Header("交互设置")]
     [SerializeField] private float interactionDistance = 3f;  // 交互距离
@@ -18,18 +18,12 @@ public class MonitorScreen_Change : MonoBehaviour
     [SerializeField] private Color[] screenColors;  // 屏幕发光颜色（可选）
     [SerializeField] private float clickEffectDuration = 0.2f;  // 点击效果持续时间
 
-    [Header("音效设置")]
-    [SerializeField] private AudioClip clickSound;  // 点击音效
-    [SerializeField] private AudioClip switchSound;  // 切换材质音效
-
     private MeshRenderer screenRenderer;
-    private AudioSource audioSource;
+    private Material screenMaterial;
     private Camera playerCamera;
     private bool isPlayerLooking = false;
     private bool isClickEffectActive = false;
     private float clickEffectTime = 0f;
-    private Color originalLightColor;
-    private float originalLightIntensity;
 
     private void Start()
     {
@@ -41,10 +35,18 @@ public class MonitorScreen_Change : MonoBehaviour
             return;
         }
 
-        // 检查材质数组
-        if (screenMaterials == null || screenMaterials.Length < 3)
+        // 获取或创建屏幕材质
+        screenMaterial = screenRenderer.material;
+        if (screenMaterial == null)
         {
-            Debug.LogError($"屏幕 {gameObject.name} 需要至少3种材质");
+            screenMaterial = new Material(Shader.Find("Standard"));
+            screenRenderer.material = screenMaterial;
+        }
+
+        // 检查渲染纹理数组
+        if (screenRenderTextures == null || screenRenderTextures.Length == 0)
+        {
+            Debug.LogWarning($"屏幕 {gameObject.name} 没有设置渲染纹理");
             return;
         }
 
@@ -60,9 +62,6 @@ public class MonitorScreen_Change : MonoBehaviour
         // 初始化光源
         if (screenLight != null)
         {
-            originalLightColor = screenLight.color;
-            originalLightIntensity = screenLight.intensity;
-
             // 如果提供了颜色数组，设置初始颜色
             if (screenColors != null && screenColors.Length > 0)
             {
@@ -70,13 +69,8 @@ public class MonitorScreen_Change : MonoBehaviour
             }
         }
 
-        // 添加音频源组件
-        audioSource = gameObject.AddComponent<AudioSource>();
-        audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 1.0f;  // 3D音效
-
-        // 设置初始材质
-        SetMaterial(currentMaterialIndex);
+        // 设置初始渲染纹理
+        SetRenderTexture(currentTextureIndex);
     }
 
     private void Update()
@@ -98,6 +92,8 @@ public class MonitorScreen_Change : MonoBehaviour
 
     private void CheckIfPlayerIsLooking()
     {
+        if (playerCamera == null) return;
+
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
 
@@ -107,47 +103,38 @@ public class MonitorScreen_Change : MonoBehaviour
 
     private void OnScreenClicked()
     {
-        // 播放点击音效
-        if (clickSound != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(clickSound);
-        }
-
         // 触发点击效果
         StartClickEffect();
 
-        // 切换到下一个材质
-        SwitchToNextMaterial();
+        // 切换到下一个渲染纹理
+        SwitchToNextRenderTexture();
 
-        Debug.Log($"屏幕被点击，切换到材质 {currentMaterialIndex + 1}/{screenMaterials.Length}");
+        Debug.Log($"屏幕被点击，切换到渲染纹理 {currentTextureIndex + 1}/{screenRenderTextures.Length}");
     }
 
-    private void SwitchToNextMaterial()
+    private void SwitchToNextRenderTexture()
     {
-        // 增加材质索引
-        currentMaterialIndex++;
+        // 增加纹理索引
+        currentTextureIndex++;
 
-        // 循环索引（0, 1, 2, 0, 1, 2...）
-        if (currentMaterialIndex >= screenMaterials.Length)
+        // 循环索引（0, 1, 2, ..., n, 0, 1, 2, ...）
+        if (currentTextureIndex >= screenRenderTextures.Length)
         {
-            currentMaterialIndex = 0;
+            currentTextureIndex = 0;
         }
 
-        // 设置新材质
-        SetMaterial(currentMaterialIndex);
-
-        // 播放切换音效
-        if (switchSound != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(switchSound);
-        }
+        // 设置新渲染纹理
+        SetRenderTexture(currentTextureIndex);
     }
 
-    private void SetMaterial(int index)
+    private void SetRenderTexture(int index)
     {
-        if (screenRenderer != null && index >= 0 && index < screenMaterials.Length)
+        if (screenMaterial != null &&
+            screenRenderTextures != null &&
+            index >= 0 && index < screenRenderTextures.Length)
         {
-            screenRenderer.material = screenMaterials[index];
+            // 设置渲染纹理到材质的_MainTex属性
+            screenMaterial.mainTexture = screenRenderTextures[index];
 
             // 更新屏幕光源
             UpdateScreenLight();
@@ -158,10 +145,10 @@ public class MonitorScreen_Change : MonoBehaviour
     {
         if (screenLight != null)
         {
-            // 如果提供了颜色数组，根据材质索引设置颜色
+            // 如果提供了颜色数组，根据纹理索引设置颜色
             if (screenColors != null && screenColors.Length > 0)
             {
-                int colorIndex = currentMaterialIndex % screenColors.Length;
+                int colorIndex = currentTextureIndex % screenColors.Length;
                 screenLight.color = screenColors[colorIndex];
             }
 
@@ -207,99 +194,38 @@ public class MonitorScreen_Change : MonoBehaviour
         }
     }
 
-    // 直接切换到指定材质（可用于事件触发）
-    public void SetMaterialByIndex(int index)
+    // 直接切换到指定渲染纹理（可用于事件触发）
+    public void SetRenderTextureByIndex(int index)
     {
-        if (index >= 0 && index < screenMaterials.Length)
+        if (index >= 0 && index < screenRenderTextures.Length)
         {
-            currentMaterialIndex = index;
-            SetMaterial(currentMaterialIndex);
-            Debug.Log($"屏幕切换到材质 {currentMaterialIndex + 1}/{screenMaterials.Length}");
+            currentTextureIndex = index;
+            SetRenderTexture(currentTextureIndex);
+            Debug.Log($"屏幕切换到渲染纹理 {currentTextureIndex + 1}/{screenRenderTextures.Length}");
         }
     }
 
-    // 获取当前材质索引
-    public int GetCurrentMaterialIndex()
+    // 获取当前渲染纹理索引
+    public int GetCurrentTextureIndex()
     {
-        return currentMaterialIndex;
+        return currentTextureIndex;
     }
 
-    // 获取当前材质名称
-    public string GetCurrentMaterialName()
+    // 获取当前渲染纹理名称
+    public string GetCurrentTextureName()
     {
-        if (screenRenderer != null && screenRenderer.material != null)
+        if (screenRenderTextures != null &&
+            currentTextureIndex >= 0 &&
+            currentTextureIndex < screenRenderTextures.Length)
         {
-            return screenRenderer.material.name;
+            return screenRenderTextures[currentTextureIndex].name;
         }
-        return "Unknown";
+        return "无纹理";
     }
 
-    // 在Unity编辑器中显示交互距离
-    private void OnDrawGizmosSelected()
+    // 获取渲染纹理数量
+    public int GetTextureCount()
     {
-        // 显示交互距离
-        Gizmos.color = Color.cyan;
-        Vector3 startPos = transform.position;
-        if (playerCamera != null)
-        {
-            startPos = playerCamera.transform.position;
-        }
-        else
-        {
-            startPos = Camera.main != null ? Camera.main.transform.position : transform.position + Vector3.back * 2f;
-        }
-        Gizmos.DrawLine(startPos, startPos + transform.forward * interactionDistance);
-
-        // 显示屏幕朝向
-        Gizmos.color = Color.white;
-        Gizmos.DrawLine(transform.position, transform.position + transform.forward * 0.5f);
-
-        // 显示屏幕范围
-        Gizmos.color = new Color(0, 1, 1, 0.1f);
-        if (screenRenderer != null)
-        {
-            Bounds bounds = screenRenderer.bounds;
-            Gizmos.DrawWireCube(bounds.center, bounds.size);
-        }
-    }
-
-    // 编辑器辅助方法：自动设置初始材质
-    [ContextMenu("设置初始材质")]
-    private void SetInitialMaterialInEditor()
-    {
-        MeshRenderer renderer = GetComponent<MeshRenderer>();
-        if (renderer != null && screenMaterials != null && screenMaterials.Length > 0)
-        {
-            renderer.sharedMaterial = screenMaterials[0];
-            Debug.Log($"已设置初始材质: {screenMaterials[0].name}");
-        }
-    }
-
-    // 编辑器辅助方法：创建默认材质数组
-    [ContextMenu("创建默认材质")]
-    private void CreateDefaultMaterials()
-    {
-        // 创建三个简单的颜色材质
-        screenMaterials = new Material[3];
-
-        // 红色材质
-        Material redMat = new Material(Shader.Find("Standard"));
-        redMat.color = Color.red;
-        redMat.name = "Screen_Red";
-        screenMaterials[0] = redMat;
-
-        // 绿色材质
-        Material greenMat = new Material(Shader.Find("Standard"));
-        greenMat.color = Color.green;
-        greenMat.name = "Screen_Green";
-        screenMaterials[1] = greenMat;
-
-        // 蓝色材质
-        Material blueMat = new Material(Shader.Find("Standard"));
-        blueMat.color = Color.blue;
-        blueMat.name = "Screen_Blue";
-        screenMaterials[2] = blueMat;
-
-        Debug.Log("已创建三个默认材质：红、绿、蓝");
+        return screenRenderTextures != null ? screenRenderTextures.Length : 0;
     }
 }
