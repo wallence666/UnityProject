@@ -2,8 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
-public class MenuAndMonitorController : MonoBehaviour
+public class CanvasManager : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject menuImage1;          // 菜单Image1
@@ -12,6 +16,10 @@ public class MenuAndMonitorController : MonoBehaviour
     [SerializeField] private Text text1;                     // 提示文本1
     [SerializeField] private Text text2;                     // 提示文本2
     [SerializeField] private Text text3;                     // 提示文本3
+
+    [Header("灯光管理")]
+    [SerializeField] private LightManager lightManager;      // 灯光管理器
+    [SerializeField] private bool initialLightMode = true;   // 初始灯光模式：true=模式1(开灯), false=模式2(关灯)
 
     [Header("Render Textures")]
     [SerializeField] private RenderTexture[] renderTextures; // 多个RenderTexture用于切换
@@ -23,6 +31,7 @@ public class MenuAndMonitorController : MonoBehaviour
     private bool isMenuActive = false;
     private bool isMonitorActive = false;
     private int currentCameraIndex = 0;
+    private bool isLightMode1 = true; // true=模式1(开灯), false=模式2(关灯)
 
     private void Start()
     {
@@ -52,6 +61,10 @@ public class MenuAndMonitorController : MonoBehaviour
         // 初始化状态变量
         isMenuActive = false;
         isMonitorActive = false;
+
+        // 初始化灯光模式
+        isLightMode1 = initialLightMode;
+        Debug.Log($"灯光控制初始化为模式: {(isLightMode1 ? "模式1(按L开灯)" : "模式2(按L关灯)")}");
 
         // 设置默认的RenderTexture
         if (cameraRawImage != null && renderTextures != null && renderTextures.Length > 0)
@@ -96,6 +109,14 @@ public class MenuAndMonitorController : MonoBehaviour
             }
         }
 
+        // L键：控制灯光（仅在菜单激活时有效）
+        if (Input.GetKeyDown(KeyCode.L) && isMenuActive)
+        {
+            ControlLights();
+            // 控制灯光后立即关闭菜单
+            CloseMenuAfterLightControl();
+        }
+
         // Q键：关闭监控（仅在监控激活时有效）
         if (Input.GetKeyDown(KeyCode.Q) && isMonitorActive)
         {
@@ -125,10 +146,93 @@ public class MenuAndMonitorController : MonoBehaviour
         if (text1 != null) text1.gameObject.SetActive(!isMenuActive);
         if (text2 != null) text2.gameObject.SetActive(isMenuActive);
 
+        // 如果打开了菜单，显示当前灯光模式
+        if (isMenuActive)
+        {
+            string lightModeText = isLightMode1 ? "模式1(按L开灯)" : "模式2(按L关灯)";
+            string lightStateText = lightManager != null ?
+                (lightManager.AreAllLightsOn() ? "灯光: 开启" : "灯光: 关闭") : "灯光: 未连接";
+            Debug.Log($"菜单已打开。{lightModeText}, {lightStateText}");
+        }
+
         // 如果打开了菜单，确保监控关闭
         if (isMenuActive && isMonitorActive)
         {
             CloseMonitor();
+        }
+    }
+
+    /// <summary>
+    /// 控制灯光
+    /// </summary>
+    private void ControlLights()
+    {
+        if (lightManager == null)
+        {
+            Debug.LogWarning("LightManager 未设置！无法控制灯光。");
+            return;
+        }
+
+        if (isLightMode1)
+        {
+            // 模式1：打开所有灯光，切换到模式2
+            lightManager.TurnOnAllLights();
+            isLightMode1 = false;
+            Debug.Log("L键被按下：打开所有灯光，切换到模式2(按L关灯)");
+        }
+        else
+        {
+            // 模式2：关闭所有灯光，切换到模式1
+            lightManager.TurnOffAllLights();
+            isLightMode1 = true;
+            Debug.Log("L键被按下：关闭所有灯光，切换到模式1(按L开灯)");
+        }
+
+        // 显示当前灯光状态
+        ShowLightStatus();
+    }
+
+    /// <summary>
+    /// 控制灯光后关闭菜单
+    /// </summary>
+    private void CloseMenuAfterLightControl()
+    {
+        if (isMenuActive)
+        {
+            isMenuActive = false;
+
+            // 关闭菜单Image1及其所有子部件
+            if (menuImage1 != null)
+            {
+                menuImage1.SetActive(false);
+
+                // 禁用所有子部件
+                foreach (Transform child in menuImage1.transform)
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+
+            // 更新文本显示：显示text1，隐藏text2
+            if (text1 != null) text1.gameObject.SetActive(true);
+            if (text2 != null) text2.gameObject.SetActive(false);
+
+            Debug.Log("L键灯光控制完成，菜单已关闭，显示文本1");
+        }
+    }
+
+    /// <summary>
+    /// 显示当前灯光状态
+    /// </summary>
+    private void ShowLightStatus()
+    {
+        if (lightManager != null)
+        {
+            int lightCount = lightManager.GetLightCount();
+            bool lightsOn = lightManager.AreAllLightsOn();
+            string mode = isLightMode1 ? "模式1(按L开灯)" : "模式2(按L关灯)";
+
+            Debug.Log($"当前{mode}, 管理{lightCount}个光源, 状态: {(lightsOn ? "开启" : "关闭")}");
         }
     }
 
@@ -343,11 +447,53 @@ public class MenuAndMonitorController : MonoBehaviour
     }
 
     /// <summary>
+    /// 设置灯光管理器
+    /// </summary>
+    public void SetLightManager(LightManager manager)
+    {
+        lightManager = manager;
+        if (lightManager != null)
+        {
+            Debug.Log($"已连接 LightManager，管理 {lightManager.GetLightCount()} 个光源");
+        }
+    }
+
+    /// <summary>
+    /// 切换灯光模式（外部调用）
+    /// </summary>
+    public void ToggleLightMode()
+    {
+        isLightMode1 = !isLightMode1;
+        Debug.Log($"灯光模式切换为: {(isLightMode1 ? "模式1(按L开灯)" : "模式2(按L关灯)")}");
+    }
+
+    /// <summary>
+    /// 设置灯光模式（外部调用）
+    /// </summary>
+    public void SetLightMode(bool mode1)
+    {
+        isLightMode1 = mode1;
+        Debug.Log($"灯光模式设置为: {(isLightMode1 ? "模式1(按L开灯)" : "模式2(按L关灯)")}");
+    }
+
+    /// <summary>
     /// 获取当前状态（用于调试）
     /// </summary>
     public string GetCurrentState()
     {
         string state = $"菜单: {isMenuActive}, 监控: {isMonitorActive}, 当前摄像头: {currentCameraIndex + 1}/{renderTextures.Length}, 呼叫器数量: {callDevices.Count}";
+
+        // 添加灯光状态
+        state += $"\n灯光模式: {(isLightMode1 ? "模式1(按L开灯)" : "模式2(按L关灯)")}";
+
+        if (lightManager != null)
+        {
+            state += $", 光源状态: {(lightManager.AreAllLightsOn() ? "开启" : "关闭")} ({lightManager.GetLightCount()}个光源)";
+        }
+        else
+        {
+            state += ", 光源状态: LightManager未连接";
+        }
 
         // 添加文本状态
         state += $"\n文本状态: Text1({(text1 != null && text1.gameObject.activeSelf ? "显示" : "隐藏")}) ";
