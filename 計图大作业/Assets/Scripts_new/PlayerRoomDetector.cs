@@ -6,6 +6,7 @@ using System.Collections.Generic;
 /// </summary>
 public class PlayerRoomDetector : MonoBehaviour
 {
+    [SerializeField] private Vector3 Offset = new Vector3(0, 0, 0); //玩家真实中心与名义中心的偏移
     private RoomData currentRoom;
     private RoomDataManager roomManager;
     
@@ -27,7 +28,7 @@ public class PlayerRoomDetector : MonoBehaviour
     {
         if (roomManager == null) return;
         
-        var newRoom = roomManager.GetRoomAtPosition(transform.position);
+        var newRoom = roomManager.GetRoomAtPosition(transform.position+Offset);
         
         if (newRoom != currentRoom)
         {
@@ -49,5 +50,16 @@ public class PlayerRoomDetector : MonoBehaviour
             }
         }
     }
+    
+    #if UNITY_EDITOR
+    void OnDrawGizmosSelected()
+    {
+        // 在编辑器中显示UI位置
+        Gizmos.color = Color.cyan;
+        Vector3 uiPos = transform.position + Offset;
+        Gizmos.DrawWireSphere(uiPos, 0.05f);
+        Gizmos.DrawLine(transform.position, uiPos);
+    }
+    #endif
 }
 

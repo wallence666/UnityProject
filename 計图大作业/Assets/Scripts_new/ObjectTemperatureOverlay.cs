@@ -63,7 +63,7 @@ public class ObjectTemperatureController : MonoBehaviour
     void Start()
     {
         propertyBlock = new MaterialPropertyBlock();
-        mainCamera = Camera.main;
+        mainCamera = GameObject.Find("PlayerCamera").GetComponent<Camera>();
         
         // 获取房间管理器
         roomManager = FindObjectOfType<RoomDataManager>();
@@ -568,8 +568,8 @@ public class ObjectTemperatureController : MonoBehaviour
     void UpdateTemperatureDisplay()
     {
         // 计算归一化温度用于颜色渐变
-        float minTemp = 15f;
-        float maxTemp = 30f;
+        float minTemp = 20f;
+        float maxTemp = 40f;
         float normalizedTemp = Mathf.InverseLerp(minTemp, maxTemp, currentTemperature);
         normalizedTemp = Mathf.Clamp01(normalizedTemp);
         

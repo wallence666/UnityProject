@@ -67,7 +67,7 @@ public class AirConditionerController : MonoBehaviour
 
     void Start()
     {
-        mainCamera = Camera.main;
+        mainCamera = GameObject.Find("PlayerCamera").GetComponent<Camera>();
         
         // 获取房间管理器
         roomManager = FindObjectOfType<RoomDataManager>();

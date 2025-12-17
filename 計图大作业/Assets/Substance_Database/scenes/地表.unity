@@ -3276,7 +3276,7 @@ MonoBehaviour:
   halfLifeTime: 5
   enableAutoControl: 1
   autoTurnOnDelay: 10
-  autoTurnOffOnExit: 1
+  autoTurnOffOnExit: 0
   showUI: 1
   uiOffset: {x: -0.3, y: 0, z: 0}
   uiScale: 0.002
@@ -4798,18 +4798,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activityParticleSystem: {fileID: 1433505897}
   emitInterval: 0.2
---- !u!114 &353138769
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 353138762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7fc1e31b028a70a4bbfd5bf72d54e541, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &370397309
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12301,7 +12289,7 @@ MonoBehaviour:
   halfLifeTime: 5
   enableAutoControl: 1
   autoTurnOnDelay: 10
-  autoTurnOffOnExit: 1
+  autoTurnOffOnExit: 0
   showUI: 1
   uiOffset: {x: -0.3, y: 0, z: 0}
   uiScale: 0.002
@@ -15085,10 +15073,10 @@ PrefabInstance:
       addedObject: {fileID: 1523027885}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ce5762145e8637f40b72246b1ef29e97, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1523027887}
+      addedObject: {fileID: 1523027886}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: ce5762145e8637f40b72246b1ef29e97, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1523027886}
+      addedObject: {fileID: 1523027887}
   m_SourcePrefab: {fileID: 100100000, guid: ce5762145e8637f40b72246b1ef29e97, type: 3}
 --- !u!1001 &1278632509
 PrefabInstance:
@@ -22934,6 +22922,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc1e31b028a70a4bbfd5bf72d54e541, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Offset: {x: 0, y: 0.5, z: 0}
 --- !u!1001 &1524700379
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29520,7 +29509,7 @@ MonoBehaviour:
   halfLifeTime: 5
   enableAutoControl: 1
   autoTurnOnDelay: 10
-  autoTurnOffOnExit: 1
+  autoTurnOffOnExit: 0
   showUI: 1
   uiOffset: {x: 0.3, y: 0, z: 0}
   uiScale: 0.002
@@ -29845,9 +29834,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2271036430416539205, guid: d512ebcdf02532446b58dc05fc0f10d2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 353138765}
-    - targetCorrespondingSourceObject: {fileID: 2271036430416539205, guid: d512ebcdf02532446b58dc05fc0f10d2, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 353138769}
   m_SourcePrefab: {fileID: 100100000, guid: d512ebcdf02532446b58dc05fc0f10d2, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
