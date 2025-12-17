@@ -53,6 +53,7 @@ public class RoomData
     [SerializeField] private Vector3 center;
     [SerializeField] private Vector3 size;
     
+    public int tempLock = 0;
     public RoomType RoomType => roomType;
     public float Temperature
     {
@@ -116,6 +117,8 @@ public class RoomData
 public class RoomDataManager : MonoBehaviour
 {
     [SerializeField] private List<RoomData> rooms = new List<RoomData>();
+    [SerializeField] private float outsideTemperature = 37.0f;
+    [SerializeField] private float halfLifeTime = 30.0f; // 使用半衰期方法平衡内外温度
     
     // 索引器，通过RoomType快速访问
     public RoomData this[RoomType type]
@@ -129,6 +132,17 @@ public class RoomDataManager : MonoBehaviour
                 return null;
             }
             return room;
+        }
+    }
+
+    void Update()
+    {
+        foreach (var room in rooms)
+        {
+            if(room.tempLock == 0)
+            {
+                room.Temperature = outsideTemperature - Mathf.Pow(0.5f,Time.deltaTime/halfLifeTime) * (outsideTemperature - room.Temperature);
+            }
         }
     }
     

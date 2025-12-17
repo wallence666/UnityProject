@@ -15,6 +15,7 @@ public class OverlayController : MonoBehaviour
     [SerializeField] private float findInterval = 5f; // 自动发现间隔
     
     private List<ObjectTemperatureController> temperatureControllers = new List<ObjectTemperatureController>();
+    private List<AirConditionerController> airConditionerController = new List<AirConditionerController>();
     private Coroutine autoFindCoroutine;
     
     void Start()
@@ -59,9 +60,32 @@ public class OverlayController : MonoBehaviour
             
             // 查找场景中的所有温度控制器
             FindAllTemperatureControllers();
+            FindAllAirConditionerController();
         }
     }
-    
+
+    /// <summary>
+    /// 查找场景中的所有空调控制器
+    /// </summary>
+    public void FindAllAirConditionerController()
+    {
+        // 清除现有列表
+        airConditionerController.Clear();
+        
+        // 查找场景中的所有ObjectTemperatureController
+        var controllers = FindObjectsOfType<AirConditionerController>();
+        
+        foreach (var controller in controllers)
+        {
+            if (controller != null && !airConditionerController.Contains(controller))
+            {
+                RegisterAirConditioner(controller);
+            }
+        }
+        
+        Debug.Log($"找到 {airConditionerController.Count} 个空调控制器");
+    }
+
     /// <summary>
     /// 查找场景中的所有温度控制器
     /// </summary>
@@ -83,7 +107,42 @@ public class OverlayController : MonoBehaviour
         
         Debug.Log($"找到 {temperatureControllers.Count} 个温度控制器");
     }
-    
+
+    /// <summary>
+    /// 注册空调控制器
+    /// </summary>
+    public void RegisterAirConditioner(AirConditionerController controller)
+    {
+        if (controller == null) return;
+        
+        if (!airConditionerController.Contains(controller))
+        {
+            airConditionerController.Add(controller);
+            
+            // 根据全局状态设置控制器的初始可见性
+            if (globalVisible)
+            {
+                controller.SetTextVisible(true);
+            }
+            else
+            {
+                controller.SetTextVisible(false);
+            }
+        }
+    }
+    /// <summary>
+    /// 注销空调控制器
+    /// </summary>
+    public void UnregisterAirConditioner(AirConditionerController controller)
+    {
+        if (controller == null) return;
+        
+        if (airConditionerController.Contains(controller))
+        {
+            airConditionerController.Remove(controller);
+        }
+    }
+
     /// <summary>
     /// 注册温度控制器
     /// </summary>
@@ -132,6 +191,13 @@ public class OverlayController : MonoBehaviour
         foreach (var controller in temperatureControllers)
         {
             if (controller != null)
+            {
+                controller.ToggleVisibility();
+            }
+        }
+        foreach (var controller in airConditionerController)
+        {
+            if(controller != null)
             {
                 controller.ToggleVisibility();
             }
