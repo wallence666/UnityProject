@@ -9,6 +9,7 @@ public class SectionViewController : MonoBehaviour
     public GameObject heatmapQuad;
     public ParticleSystem heatmapParticleSystem;
     public ParticleSystemRenderer heatmapParticlerenderer;
+    public RoomLabelLayerRenderer roomLabelLayer;
 
     int mode = 0; // 0 = FPS, 1 = TopView, 2 = Temperature, 3 = Heatmap
 
@@ -29,6 +30,7 @@ public class SectionViewController : MonoBehaviour
         heatmapQuad.SetActive(false);
         heatmapParticlerenderer = heatmapParticleSystem.GetComponent<ParticleSystemRenderer>();
         heatmapParticlerenderer.enabled = false;
+        roomLabelLayer.SetVisible(false);
     }
 
     void Update()
@@ -56,6 +58,7 @@ public class SectionViewController : MonoBehaviour
             FunctionQuadCamera.SetActive(false);
             heatmapQuad.SetActive(false);
             heatmapParticlerenderer.enabled = false;
+            roomLabelLayer.SetVisible(false);
             // 恢复相机位置（避免卡进模型）
             playerCamera.transform.localPosition = fpsPos;
             playerCamera.transform.localRotation = fpsRot;
@@ -71,6 +74,7 @@ public class SectionViewController : MonoBehaviour
             FunctionQuadCamera.SetActive(true);
             heatmapQuad.SetActive(false);
             heatmapParticlerenderer.enabled = false;
+            roomLabelLayer.SetVisible(true);
         }
         else if (mode == 2)
         {
@@ -83,6 +87,7 @@ public class SectionViewController : MonoBehaviour
             FunctionQuadCamera.SetActive(false);
             heatmapQuad.SetActive(false);
             heatmapParticlerenderer.enabled = false;
+            roomLabelLayer.SetVisible(false);
         }
         else if (mode == 3)
         {
@@ -95,6 +100,7 @@ public class SectionViewController : MonoBehaviour
             FunctionQuadCamera.SetActive(false);
             heatmapQuad.SetActive(true);
             heatmapParticlerenderer.enabled = true;
+            roomLabelLayer.SetVisible(false);
         }
     }
 }

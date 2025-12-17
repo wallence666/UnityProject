@@ -5,6 +5,7 @@ public class TemperatureLayerRenderer : MonoBehaviour
 {
     public RoomDataManager roomManager;  // 拖入你的 RoomDataManager 空物体
     public Material temperatureMaterial; // 一个简单的 Unlit/Color 材质
+    public GameObject temperaturelablePrefab;
     private List<GameObject> tempPlanes = new List<GameObject>();
 
     void Start()
@@ -59,6 +60,16 @@ public class TemperatureLayerRenderer : MonoBehaviour
             renderer.material.color = GetTemperatureColor(room.Temperature);
 
             tempPlanes.Add(plane);
+            GameObject label = Instantiate(
+                temperaturelablePrefab,
+                plane.transform
+            );
+
+            label.transform.position = plane.transform.position + Vector3.up * 0.2f;
+            label.transform.rotation = Quaternion.Euler(90, 0, 0);
+
+            var text = label.GetComponent<TMPro.TextMeshPro>();
+            text.text = $"{room.RoomType}\n{room.Temperature:F1} °F";
         }
     }
 
