@@ -2,10 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
 
 public class CanvasManager : MonoBehaviour
 {
@@ -16,6 +12,10 @@ public class CanvasManager : MonoBehaviour
     [SerializeField] private Text text1;                     // 提示文本1
     [SerializeField] private Text text2;                     // 提示文本2
     [SerializeField] private Text text3;                     // 提示文本3
+    [SerializeField] private Text text4;                     // 新增：提示文本4
+    [SerializeField] private Text text5;                     // 新增：提示文本5
+    [SerializeField] private Text text6;                     // 新增：提示文本6
+    [SerializeField] private Text text7;                     // 新增：提示文本7
 
     [Header("灯光管理")]
     [SerializeField] private LightManager lightManager;      // 灯光管理器
@@ -32,6 +32,7 @@ public class CanvasManager : MonoBehaviour
     private bool isMonitorActive = false;
     private int currentCameraIndex = 0;
     private bool isLightMode1 = true; // true=模式1(开灯), false=模式2(关灯)
+    private int currentTextIndex = 0; // 新增：当前显示的文本索引（0:text4, 1:text5, 2:text6, 3:text7）
 
     private void Start()
     {
@@ -57,6 +58,14 @@ public class CanvasManager : MonoBehaviour
         if (text1 != null) text1.gameObject.SetActive(true);
         if (text2 != null) text2.gameObject.SetActive(false);
         if (text3 != null) text3.gameObject.SetActive(false);
+
+        // 新增：设置text4-text7的初始状态
+        if (text4 != null) text4.gameObject.SetActive(true);  // 初始显示text4
+        if (text5 != null) text5.gameObject.SetActive(false);
+        if (text6 != null) text6.gameObject.SetActive(false);
+        if (text7 != null) text7.gameObject.SetActive(false);
+
+        currentTextIndex = 0; // 初始显示text4
 
         // 初始化状态变量
         isMenuActive = false;
@@ -121,6 +130,59 @@ public class CanvasManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q) && isMonitorActive)
         {
             CloseMonitor();
+        }
+
+        // 新增：F键切换text4-text7
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            CycleText4ToText7();
+        }
+    }
+
+    /// <summary>
+    /// 新增：循环切换text4到text7
+    /// </summary>
+    private void CycleText4ToText7()
+    {
+        // 隐藏当前显示的文本
+        switch (currentTextIndex)
+        {
+            case 0:
+                if (text4 != null) text4.gameObject.SetActive(false);
+                break;
+            case 1:
+                if (text5 != null) text5.gameObject.SetActive(false);
+                break;
+            case 2:
+                if (text6 != null) text6.gameObject.SetActive(false);
+                break;
+            case 3:
+                if (text7 != null) text7.gameObject.SetActive(false);
+                break;
+        }
+
+        // 计算下一个索引（循环）
+        currentTextIndex = (currentTextIndex + 1) % 4;
+
+        // 显示下一个文本
+        switch (currentTextIndex)
+        {
+            case 0:
+                if (text4 != null) text4.gameObject.SetActive(true);
+                Debug.Log("显示文本4");
+                break;
+            case 1:
+                if (text5 != null) text5.gameObject.SetActive(true);
+                Debug.Log("显示文本5");
+                break;
+            case 2:
+                if (text6 != null) text6.gameObject.SetActive(true);
+                Debug.Log("显示文本6");
+                break;
+            case 3:
+                if (text7 != null) text7.gameObject.SetActive(true);
+                Debug.Log("显示文本7");
+                break;
         }
     }
 
@@ -400,6 +462,21 @@ public class CanvasManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 获取当前显示的额外文本名称
+    /// </summary>
+    private string GetCurrentExtraTextName()
+    {
+        return currentTextIndex switch
+        {
+            0 => "text4",
+            1 => "text5",
+            2 => "text6",
+            3 => "text7",
+            _ => "unknown"
+        };
+    }
+
+    /// <summary>
     /// 添加呼叫器到列表
     /// </summary>
     public void AddCallDevice(CallDevice device)
@@ -499,6 +576,13 @@ public class CanvasManager : MonoBehaviour
         state += $"\n文本状态: Text1({(text1 != null && text1.gameObject.activeSelf ? "显示" : "隐藏")}) ";
         state += $"Text2({(text2 != null && text2.gameObject.activeSelf ? "显示" : "隐藏")}) ";
         state += $"Text3({(text3 != null && text3.gameObject.activeSelf ? "显示" : "隐藏")})";
+
+        // 新增：添加text4-text7状态
+        state += $"\n额外文本状态: Text4({(text4 != null && text4.gameObject.activeSelf ? "显示" : "隐藏")}) ";
+        state += $"Text5({(text5 != null && text5.gameObject.activeSelf ? "显示" : "隐藏")}) ";
+        state += $"Text6({(text6 != null && text6.gameObject.activeSelf ? "显示" : "隐藏")}) ";
+        state += $"Text7({(text7 != null && text7.gameObject.activeSelf ? "显示" : "隐藏")})";
+        state += $"\n当前额外文本索引: {currentTextIndex} ({GetCurrentExtraTextName()})";
 
         return state;
     }
