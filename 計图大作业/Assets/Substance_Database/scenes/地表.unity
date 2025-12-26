@@ -1772,6 +1772,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   updateInterval: 1
+  fpsText: {fileID: 126293857}
+  showInConsole: 1
 --- !u!4 &94602441
 Transform:
   m_ObjectHideFlags: 0
@@ -2137,6 +2139,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1380799541}
   m_SourcePrefab: {fileID: 100100000, guid: e41b6552046814b19a9905c4f669429b, type: 3}
+--- !u!114 &126293857 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6341193577176305975, guid: fa6fdd1ca918d2b4b93a967e22321d53, type: 3}
+  m_PrefabInstance: {fileID: 1179835861}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &126399653
 PrefabInstance:
   m_ObjectHideFlags: 0
